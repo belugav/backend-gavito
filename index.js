@@ -1,21 +1,35 @@
 const express = require("express");
-const fs = require("fs");
+const Contenedor = require("./contenedor.js");
 const PORT = process.env.PORT || 8080;
+const apiRoutes = require('./routers/index');
+const path = require('path');
 
 const app = express();
 
-const productos = fs.readFileSync("./productos.txt", "utf-8");
-const arrayProductos = JSON.parse(productos);
+const c = new Contenedor();
 
-function getRandom(min, max) {
+
+//middlewares
+
+app.use(express.json());
+
+//middlewares
+app.use(express.static('public'));
+
+
+//Routes
+ app.use('/api',apiRoutes);
+
+
+
+function getRandom(length) {
   return Math.floor(Math.random() * (arrayProductos.length - 0)) + 0;
 }
 
-
 app.get("/", (req, res) => {
-  res.send(`<h1 style="color:orange;"> Bienvenidos a Express </h1>
+  res.send(`<h1 style="color:red;"> Bienvenidos a Express </h1>
   <hr>
-  <h2 style="color:coral;"> Rutas: </h2>
+  <h2 style="color:blue;"> Rutas disponibles: </h2>
  <ul>
   <li>/productos</li>
   <li>/productosRandom</li>
@@ -25,11 +39,17 @@ app.get("/", (req, res) => {
 });
 
 app.get("/productos", (req, res) => {
-  res.send(arrayProductos);
+  c.getAll().then( resultado => {
+    res.send(resultado);
+  });
+  // console.log(getRandom());
 });
 
 app.get("/productosRandom", (req, res) => {
-  res.send(arrayProductos[getRandom()]);
+  c.getAll().then( resultado => {
+   
+    res.send(resultado[getRandom(resultado.length)]);
+  });
 });
 
 app.listen(PORT, () => {
